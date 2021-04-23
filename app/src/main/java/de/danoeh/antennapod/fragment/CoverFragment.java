@@ -65,7 +65,6 @@ public class CoverFragment extends Fragment {
         txtvPodcastTitle = root.findViewById(R.id.txtvPodcastTitle);
         txtvEpisodeTitle = root.findViewById(R.id.txtvEpisodeTitle);
         imgvCover = root.findViewById(R.id.imgvCover);
-        imgvCover.setOnClickListener(v -> onPlayPause());
         return root;
     }
 
@@ -102,6 +101,7 @@ public class CoverFragment extends Fragment {
                 + StringUtils.replace(StringUtils.stripToEmpty(pubDateStr), " ", "\u00A0"));
         Intent openFeed = MainActivity.getIntentToOpenFeed(getContext(), ((FeedMedia) media).getItem().getFeedId());
         txtvPodcastTitle.setOnClickListener(v -> startActivity(openFeed));
+        imgvCover.setOnClickListener(v -> startActivity(openFeed));
         txtvEpisodeTitle.setText(media.getEpisodeTitle());
         txtvEpisodeTitle.setOnClickListener(v -> {
             FeedItem feedItem = ((FeedMedia) media).getItem();
