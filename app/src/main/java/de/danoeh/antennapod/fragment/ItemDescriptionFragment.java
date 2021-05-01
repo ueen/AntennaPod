@@ -9,6 +9,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
+
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.core.feed.FeedMedia;
 import de.danoeh.antennapod.core.storage.DBReader;
@@ -86,6 +88,10 @@ public class ItemDescriptionFragment extends Fragment {
         }
         webViewLoader = Maybe.<String>create(emitter -> {
             Playable media = controller.getMedia();
+            if (media == null) {
+                emitter.onComplete();
+                return;
+            }
             if (media instanceof FeedMedia) {
                 FeedMedia feedMedia = ((FeedMedia) media);
                 if (feedMedia.getItem() == null) {
@@ -95,7 +101,8 @@ public class ItemDescriptionFragment extends Fragment {
             }
             Timeline timeline = new Timeline(getActivity(), media.getDescription(), media.getDuration());
             emitter.onSuccess(timeline.processShownotes());
-        }).subscribeOn(Schedulers.io())
+        })
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(data -> {
                     webvDescription.loadDataWithBaseURL("https://127.0.0.1", data, "text/html",
@@ -108,6 +115,7 @@ public class ItemDescriptionFragment extends Fragment {
     public void onPause() {
         super.onPause();
         savePreference();
+
     }
 
     private void savePreference() {

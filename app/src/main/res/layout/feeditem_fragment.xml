@@ -126,7 +126,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp"
-                    tools:src="@drawable/ic_settings_black" />
+                    tools:src="@drawable/ic_settings" />
 
                 <TextView
                     android:textAppearance="@style/TextAppearance.AppCompat.Button"
@@ -154,7 +154,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp"
-                    tools:src="@drawable/ic_settings_black" />
+                    tools:src="@drawable/ic_settings" />
 
                 <TextView
                     android:textAppearance="@style/TextAppearance.AppCompat.Button"
@@ -182,18 +182,12 @@
 
     </LinearLayout>
 
-    <de.danoeh.antennapod.view.NestedScrollableHost
+    <de.danoeh.antennapod.view.ShownotesWebView
         android:layout_below="@id/header"
+        android:id="@+id/webvDescription"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <de.danoeh.antennapod.view.ShownotesWebView
-            android:id="@+id/webvDescription"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:windowContentOverlay" />
-
-    </de.danoeh.antennapod.view.NestedScrollableHost>
+        android:layout_height="match_parent"
+        android:foreground="?android:windowContentOverlay" />
 
     <FrameLayout
         android:layout_width="match_parent"
