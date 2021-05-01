@@ -12,7 +12,7 @@ public class PodcastSearcherRegistry {
     private PodcastSearcherRegistry() {
     }
 
-    public static synchronized List<SearcherInfo> getSearchProviders() {
+    public static List<SearcherInfo> getSearchProviders() {
         if (searchProviders == null) {
             searchProviders = new ArrayList<>();
             searchProviders.add(new SearcherInfo(new CombinedSearcher(), 1.0f));

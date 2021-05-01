@@ -217,7 +217,7 @@ public abstract class PlaybackServiceMediaPlayer {
      * could result in nonsensical results (like a status of PLAYING, but a null playable)
      * @return the current player status
      */
-    public synchronized PlayerStatus getPlayerStatus() {
+    public PlayerStatus getPlayerStatus() {
         return playerStatus;
     }
 

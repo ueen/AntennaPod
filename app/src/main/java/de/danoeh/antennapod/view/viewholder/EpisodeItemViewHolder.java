@@ -154,7 +154,6 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
                 Converter.getDurationStringLocalized(activity, media.getDuration())));
         if (item.getState() == FeedItem.State.PLAYING || item.getState() == FeedItem.State.IN_PROGRESS) {
             int progress = (int) (100.0 * media.getPosition() / media.getDuration());
-            int remainingTime = Math.max(media.getDuration() - media.getPosition(), 0);
             progressBar.setProgress(progress);
             position.setText(Converter.getDurationStringLong(media.getPosition()));
             position.setContentDescription(activity.getString(R.string.position,
@@ -162,7 +161,7 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
             progressBar.setVisibility(View.VISIBLE);
             position.setVisibility(View.VISIBLE);
             if (UserPreferences.shouldShowRemainingTime()) {
-                duration.setText(((remainingTime > 0) ? "-" : "") + Converter.getDurationStringLong(remainingTime));
+                duration.setText("-" + Converter.getDurationStringLong(media.getDuration() - media.getPosition()));
                 duration.setContentDescription(activity.getString(R.string.chapter_duration,
                         Converter.getDurationStringLocalized(activity, (media.getDuration() - media.getPosition()))));
             }
@@ -195,14 +194,14 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
     private void updateDuration(PlaybackPositionEvent event) {
         int currentPosition = event.getPosition();
         int timeDuration = event.getDuration();
-        int remainingTime = Math.max(timeDuration - currentPosition, 0);
+        int remainingTime = event.getDuration() - event.getPosition();
         Log.d(TAG, "currentPosition " + Converter.getDurationStringLong(currentPosition));
         if (currentPosition == PlaybackService.INVALID_TIME || timeDuration == PlaybackService.INVALID_TIME) {
             Log.w(TAG, "Could not react to position observer update because of invalid time");
             return;
         }
         if (UserPreferences.shouldShowRemainingTime()) {
-            duration.setText(((remainingTime > 0) ? "-" : "") + Converter.getDurationStringLong(remainingTime));
+            duration.setText("-" + Converter.getDurationStringLong(remainingTime));
         } else {
             duration.setText(Converter.getDurationStringLong(timeDuration));
         }

@@ -31,7 +31,6 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat {
     private static final String STATISTICS = "statistics";
     private static final String PREF_ABOUT = "prefAbout";
     private static final String PREF_NOTIFICATION = "notifications";
-    private static final String PREF_CONTRIBUTE = "prefContribute";
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -88,16 +87,14 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat {
         });
         findPreference(PREF_ABOUT).setOnPreferenceClickListener(
                 preference -> {
-                    getParentFragmentManager().beginTransaction()
-                            .replace(R.id.settingsContainer, new AboutFragment())
+                    getParentFragmentManager().beginTransaction().replace(R.id.content, new AboutFragment())
                             .addToBackStack(getString(R.string.about_pref)).commit();
                     return true;
                 }
         );
         findPreference(STATISTICS).setOnPreferenceClickListener(
                 preference -> {
-                    getParentFragmentManager().beginTransaction()
-                            .replace(R.id.settingsContainer, new StatisticsFragment())
+                    getParentFragmentManager().beginTransaction().replace(R.id.content, new StatisticsFragment())
                             .addToBackStack(getString(R.string.statistics_label)).commit();
                     return true;
                 }
@@ -110,10 +107,6 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat {
             IntentUtils.openInBrowser(getContext(), "https://forum.antennapod.org/");
             return true;
         });
-        findPreference(PREF_CONTRIBUTE).setOnPreferenceClickListener(preference -> {
-            IntentUtils.openInBrowser(getContext(), "https://antennapod.org/contribute/");
-            return true;
-        });
         findPreference(PREF_SEND_BUG_REPORT).setOnPreferenceClickListener(preference -> {
             startActivity(new Intent(getActivity(), BugReportActivity.class));
             return true;
@@ -124,7 +117,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat {
         SearchPreference searchPreference = findPreference("searchPreference");
         SearchConfiguration config = searchPreference.getSearchConfiguration();
         config.setActivity((AppCompatActivity) getActivity());
-        config.setFragmentContainerViewId(R.id.settingsContainer);
+        config.setFragmentContainerViewId(R.id.content);
         config.setBreadcrumbsEnabled(true);
 
         config.index(R.xml.preferences_user_interface)

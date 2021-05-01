@@ -34,7 +34,8 @@ import java.util.regex.Pattern;
 public class HtmlToPlainText {
 
     /**
-     * Use this method to strip off HTML encoding from given text.
+     * Use this method to strip off HTML encoding from given text
+     * <p>
      * Replaces bullet points with *, ignores colors/bold/...
      *
      * @param str String with any encoding
@@ -59,8 +60,10 @@ public class HtmlToPlainText {
      * @return <b>True</b> if text contains any HTML tags<br /><b>False</b> is no HTML tag is found
      */
     private static boolean isHtml(String str) {
-        final String htmlTagPattern = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
-        return Pattern.compile(htmlTagPattern).matcher(str).find();
+        final String HTML_TAG_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+        Pattern htmlValidator = TextUtils.isEmpty(HTML_TAG_PATTERN) ? null : Pattern.compile(HTML_TAG_PATTERN);
+
+        return htmlValidator.matcher(str).find();
     }
 
     /**

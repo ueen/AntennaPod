@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Stack;
 
 import de.danoeh.antennapod.core.feed.Feed;
-import de.danoeh.antennapod.core.feed.FeedFunding;
 import de.danoeh.antennapod.core.feed.FeedItem;
 import de.danoeh.antennapod.core.syndication.namespace.Namespace;
 import de.danoeh.antennapod.core.syndication.namespace.SyndElement;
@@ -29,7 +28,6 @@ public class HandlerState {
     final Map<String, String> alternateUrls;
     private final ArrayList<FeedItem> items;
     private FeedItem currentItem;
-    private FeedFunding currentFunding;
     final Stack<SyndElement> tagstack;
     /**
      * Namespaces that have been defined so far.
@@ -78,14 +76,6 @@ public class HandlerState {
 
     public void setCurrentItem(FeedItem currentItem) {
         this.currentItem = currentItem;
-    }
-
-    public FeedFunding getCurrentFunding() {
-        return currentFunding;
-    }
-
-    public void setCurrentFunding(FeedFunding currentFunding) {
-        this.currentFunding = currentFunding;
     }
 
     /**

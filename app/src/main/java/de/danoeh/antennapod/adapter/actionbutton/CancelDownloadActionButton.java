@@ -1,7 +1,7 @@
 package de.danoeh.antennapod.adapter.actionbutton;
 
 import android.content.Context;
-import androidx.annotation.DrawableRes;
+import androidx.annotation.AttrRes;
 import androidx.annotation.StringRes;
 import android.widget.Toast;
 
@@ -25,9 +25,9 @@ public class CancelDownloadActionButton extends ItemActionButton {
     }
 
     @Override
-    @DrawableRes
+    @AttrRes
     public int getDrawable() {
-        return R.drawable.ic_cancel;
+        return R.attr.navigation_cancel;
     }
 
     @Override

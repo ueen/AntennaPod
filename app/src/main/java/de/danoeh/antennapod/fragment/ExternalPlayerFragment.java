@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,7 +24,6 @@ import de.danoeh.antennapod.core.service.playback.PlaybackService;
 import de.danoeh.antennapod.core.service.playback.PlayerStatus;
 import de.danoeh.antennapod.core.util.playback.Playable;
 import de.danoeh.antennapod.core.util.playback.PlaybackController;
-import de.danoeh.antennapod.view.PlayButton;
 import io.reactivex.Maybe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -40,7 +40,7 @@ public class ExternalPlayerFragment extends Fragment {
 
     private ImageView imgvCover;
     private TextView txtvTitle;
-    private PlayButton butPlay;
+    private ImageButton butPlay;
     private TextView feedName;
     private ProgressBar progressBar;
     private PlaybackController controller;
@@ -103,8 +103,8 @@ public class ExternalPlayerFragment extends Fragment {
             }
 
             @Override
-            protected void updatePlayButtonShowsPlay(boolean showPlay) {
-                butPlay.setIsShowPlay(showPlay);
+            public ImageButton getPlayButton() {
+                return butPlay;
             }
 
             @Override

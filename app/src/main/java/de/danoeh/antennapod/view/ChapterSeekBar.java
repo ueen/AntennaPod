@@ -3,8 +3,6 @@ package de.danoeh.antennapod.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.AttributeSet;
 import de.danoeh.antennapod.ui.common.ThemeUtils;
 
@@ -12,13 +10,11 @@ public class ChapterSeekBar extends androidx.appcompat.widget.AppCompatSeekBar {
 
     private float top;
     private float width;
-    private float center;
     private float bottom;
     private float density;
     private float progressPrimary;
     private float progressSecondary;
     private float[] dividerPos;
-    private boolean isHighlighted = false;
     private final Paint paintBackground = new Paint();
     private final Paint paintProgressPrimary = new Paint();
 
@@ -41,7 +37,6 @@ public class ChapterSeekBar extends androidx.appcompat.widget.AppCompatSeekBar {
         setBackground(null); // Removes the thumb shadow
         dividerPos = null;
         density = context.getResources().getDisplayMetrics().density;
-
         paintBackground.setColor(ThemeUtils.getColorFromAttr(getContext(),
                 de.danoeh.antennapod.core.R.attr.currently_playing_background));
         paintBackground.setAlpha(128);
@@ -64,22 +59,10 @@ public class ChapterSeekBar extends androidx.appcompat.widget.AppCompatSeekBar {
         }
     }
 
-    public void highlightCurrentChapter() {
-        isHighlighted = true;
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                isHighlighted = false;
-                invalidate();
-            }
-        }, 1000);
-    }
-
     @Override
     protected synchronized void onDraw(Canvas canvas) {
-        center = (getBottom() - getPaddingBottom() - getTop() - getPaddingTop()) / 2.0f;
-        top = center - density * 1.5f;
-        bottom = center + density * 1.5f;
+        top = getTop() + density * 7.5f;
+        bottom = getBottom() - density * 7.5f;
         width = (float) (getRight() - getPaddingRight() - getLeft() - getPaddingLeft());
         progressSecondary = getSecondaryProgress() / (float) getMax() * width;
         progressPrimary = getProgress() / (float) getMax() * width;
@@ -104,24 +87,24 @@ public class ChapterSeekBar extends androidx.appcompat.widget.AppCompatSeekBar {
     private void drawProgressChapters(Canvas canvas) {
         final int saveCount = canvas.save();
         int currChapter = 1;
-        float chapterMargin = density * 1.2f;
-        float topExpanded = center - density * 2.0f;
-        float bottomExpanded = center + density * 2.0f;
+        float chapterMargin = density * 0.6f;
+        float topExpanded = getTop() + density * 7;
+        float bottomExpanded = getBottom() - density * 7;
 
         canvas.translate(getPaddingLeft(), getPaddingTop());
 
         for (int i = 1; i < dividerPos.length; i++) {
             float right = dividerPos[i] * width - chapterMargin;
-            float left = dividerPos[i - 1] * width;
+            float left = dividerPos[i - 1] * width + chapterMargin;
             float rightCurr = dividerPos[currChapter] * width - chapterMargin;
-            float leftCurr = dividerPos[currChapter - 1] * width;
+            float leftCurr = dividerPos[currChapter - 1] * width + chapterMargin;
 
             canvas.drawRect(left, top, right, bottom, paintBackground);
 
             if (right < progressPrimary) {
                 currChapter = i + 1;
                 canvas.drawRect(left, top, right, bottom, paintProgressPrimary);
-            } else if (isHighlighted || isPressed()) {
+            } else if (isPressed()) {
                 canvas.drawRect(leftCurr, topExpanded, rightCurr, bottomExpanded, paintBackground);
                 canvas.drawRect(leftCurr, topExpanded, progressPrimary, bottomExpanded, paintProgressPrimary);
             } else {

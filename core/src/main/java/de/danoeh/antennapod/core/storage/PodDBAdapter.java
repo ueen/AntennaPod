@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import de.danoeh.antennapod.core.feed.FeedFunding;
 import de.danoeh.antennapod.core.storage.mapper.FeedItemFilterQuery;
 import org.apache.commons.io.FileUtils;
 
@@ -332,7 +331,7 @@ public class PodDBAdapter {
         PodDBAdapter.context = context.getApplicationContext();
     }
 
-    public static synchronized PodDBAdapter getInstance() {
+    public static PodDBAdapter getInstance() {
         if (instance == null) {
             instance = new PodDBAdapter();
         }
@@ -404,7 +403,7 @@ public class PodDBAdapter {
         values.put(KEY_TITLE, feed.getFeedTitle());
         values.put(KEY_LINK, feed.getLink());
         values.put(KEY_DESCRIPTION, feed.getDescription());
-        values.put(KEY_PAYMENT_LINK, FeedFunding.getPaymentLinksAsString(feed.getPaymentLinks()));
+        values.put(KEY_PAYMENT_LINK, feed.getPaymentLink());
         values.put(KEY_AUTHOR, feed.getAuthor());
         values.put(KEY_LANGUAGE, feed.getLanguage());
         values.put(KEY_IMAGE_URL, feed.getImageUrl());

@@ -11,7 +11,6 @@ import androidx.documentfile.provider.AssetsDocumentFile;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import de.danoeh.antennapod.core.preferences.PlaybackPreferences;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +67,6 @@ public class LocalFeedUpdaterTest {
         // Initialize environment
         context = InstrumentationRegistry.getInstrumentation().getContext();
         UserPreferences.init(context);
-        PlaybackPreferences.init(context);
 
         Application app = (Application) context;
         ClientConfig.applicationCallbacks = mock(ApplicationCallbacks.class);

@@ -8,7 +8,6 @@ import android.util.Log;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
 public class FastBlurTransformation extends BitmapTransformation {
@@ -44,7 +43,7 @@ public class FastBlurTransformation extends BitmapTransformation {
 
     @Override
     public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
-        messageDigest.update(TAG.getBytes(Charset.defaultCharset()));
+        messageDigest.update(TAG.getBytes());
     }
 
     private static Bitmap fastBlur(Bitmap bitmap, int radius) {

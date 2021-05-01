@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.DrawableRes;
+import androidx.annotation.AttrRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
@@ -33,9 +33,9 @@ public class DownloadActionButton extends ItemActionButton {
     }
 
     @Override
-    @DrawableRes
+    @AttrRes
     public int getDrawable() {
-        return R.drawable.ic_download;
+        return R.attr.av_download;
     }
 
     @Override

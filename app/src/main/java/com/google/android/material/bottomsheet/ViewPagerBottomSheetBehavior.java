@@ -53,9 +53,6 @@ public class ViewPagerBottomSheetBehavior<V extends View> extends BottomSheetBeh
     }
 
     public void updateScrollingChild() {
-        if (viewRef == null) {
-            return;
-        }
         final View scrollingChild = findScrollingChild(viewRef.get());
         nestedScrollingChildRef = new WeakReference<>(scrollingChild);
     }

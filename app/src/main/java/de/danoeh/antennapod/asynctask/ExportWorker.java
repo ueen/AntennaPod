@@ -41,8 +41,8 @@ public class ExportWorker {
 
     public Observable<File> exportObservable() {
         if (output.exists()) {
-            boolean success = output.delete();
-            Log.w(TAG, "Overwriting previously exported file: " + success);
+            Log.w(TAG, "Overwriting previously exported file.");
+            output.delete();
         }
         return Observable.create(subscriber -> {
             OutputStreamWriter writer = null;

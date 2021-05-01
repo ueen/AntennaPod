@@ -7,7 +7,7 @@
             android:title="@string/refresh_label"
             android:menuCategory="container"
             custom:showAsAction="always"
-            android:icon="@drawable/ic_refresh"/>
+            android:icon="?attr/navigation_refresh"/>
 
 
     <item

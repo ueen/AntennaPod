@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.TypedArray;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
@@ -14,6 +15,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.SurfaceHolder;
+import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import de.danoeh.antennapod.core.R;
 import de.danoeh.antennapod.core.event.MessageEvent;
@@ -26,6 +28,12 @@ import de.danoeh.antennapod.core.preferences.UserPreferences;
 import de.danoeh.antennapod.core.service.playback.PlaybackService;
 import de.danoeh.antennapod.core.service.playback.PlaybackServiceMediaPlayer;
 import de.danoeh.antennapod.core.service.playback.PlayerStatus;
+import de.danoeh.antennapod.ui.common.ThemeUtils;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -52,6 +60,8 @@ public abstract class PlaybackController {
     private boolean initialized = false;
     private boolean eventsRegistered = false;
 
+    private Disposable mediaLoader;
+
     public PlaybackController(@NonNull Activity activity) {
         this.activity = activity;
     }
@@ -67,7 +77,7 @@ public abstract class PlaybackController {
         if (PlaybackService.isRunning) {
             initServiceRunning();
         } else {
-            updatePlayButtonShowsPlay(true);
+            initServiceNotRunning();
         }
     }
 
@@ -198,12 +208,7 @@ public abstract class PlaybackController {
                 handleStatus();
             } else {
                 Log.w(TAG, "Couldn't receive status update: playbackService was null");
-                if (PlaybackService.isRunning) {
-                    bindToService();
-                } else {
-                    status = PlayerStatus.STOPPED;
-                    handleStatus();
-                }
+                bindToService();
             }
         }
     };
@@ -227,7 +232,7 @@ public abstract class PlaybackController {
                     onBufferUpdate(progress);
                     break;
                 case PlaybackService.NOTIFICATION_TYPE_RELOAD:
-                    if (playbackService == null && PlaybackService.isRunning) {
+                    if (playbackService == null) {
                         bindToService();
                         return;
                     }
@@ -302,6 +307,21 @@ public abstract class PlaybackController {
      * should be used to update the GUI or start/cancel background threads.
      */
     private void handleStatus() {
+        final int playResource;
+        final int pauseResource;
+        final CharSequence playText = activity.getString(R.string.play_label);
+        final CharSequence pauseText = activity.getString(R.string.pause_label);
+
+        if (PlaybackService.getCurrentMediaType() == MediaType.AUDIO  ||  PlaybackService.isCasting()) {
+            TypedArray res = activity.obtainStyledAttributes(new int[]{ R.attr.av_play, R.attr.av_pause});
+            playResource = res.getResourceId(0, R.drawable.ic_av_play_black_48dp);
+            pauseResource = res.getResourceId(1, R.drawable.ic_av_pause_black_48dp);
+            res.recycle();
+        } else {
+            playResource = R.drawable.ic_av_play_white_80dp;
+            pauseResource = R.drawable.ic_av_pause_white_80dp;
+        }
+
         Log.d(TAG, "status: " + status.toString());
         switch (status) {
             case ERROR:
@@ -311,31 +331,36 @@ public abstract class PlaybackController {
             case PAUSED:
                 checkMediaInfoLoaded();
                 onPositionObserverUpdate();
-                updatePlayButtonShowsPlay(true);
-                if (!PlaybackService.isCasting() && PlaybackService.getCurrentMediaType() == MediaType.VIDEO) {
+                updatePlayButtonAppearance(playResource, playText);
+                if (!PlaybackService.isCasting() &&
+                        PlaybackService.getCurrentMediaType() == MediaType.VIDEO) {
                     setScreenOn(false);
                 }
                 break;
             case PLAYING:
                 checkMediaInfoLoaded();
-                if (!PlaybackService.isCasting() && PlaybackService.getCurrentMediaType() == MediaType.VIDEO) {
+                if (!PlaybackService.isCasting() &&
+                        PlaybackService.getCurrentMediaType() == MediaType.VIDEO) {
                     onAwaitingVideoSurface();
                     setScreenOn(true);
                 }
-                updatePlayButtonShowsPlay(false);
+                updatePlayButtonAppearance(pauseResource, pauseText);
                 break;
             case PREPARING:
                 checkMediaInfoLoaded();
                 if (playbackService != null) {
-                    updatePlayButtonShowsPlay(!playbackService.isStartWhenPrepared());
+                    if (playbackService.isStartWhenPrepared()) {
+                        updatePlayButtonAppearance(pauseResource, pauseText);
+                    } else {
+                        updatePlayButtonAppearance(playResource, playText);
+                    }
                 }
                 break;
             case STOPPED:
-                updatePlayButtonShowsPlay(true);
                 break;
             case PREPARED:
                 checkMediaInfoLoaded();
-                updatePlayButtonShowsPlay(true);
+                updatePlayButtonAppearance(playResource, playText);
                 onPositionObserverUpdate();
                 break;
             case SEEKING:
@@ -343,7 +368,7 @@ public abstract class PlaybackController {
                 break;
             case INITIALIZED:
                 checkMediaInfoLoaded();
-                updatePlayButtonShowsPlay(true);
+                updatePlayButtonAppearance(playResource, playText);
                 break;
         }
     }
@@ -355,8 +380,16 @@ public abstract class PlaybackController {
         mediaInfoLoaded = true;
     }
 
-    protected void updatePlayButtonShowsPlay(boolean showPlay) {
+    private void updatePlayButtonAppearance(int resource, CharSequence contentDescription) {
+        ImageButton butPlay = getPlayButton();
+        if(butPlay != null) {
+            butPlay.setImageResource(resource);
+            butPlay.setContentDescription(contentDescription);
+        }
+    }
 
+    public ImageButton getPlayButton() {
+        return null;
     }
 
     public abstract void loadMediaInfo();
@@ -622,5 +655,30 @@ public abstract class PlaybackController {
 
     public boolean isStreaming() {
         return playbackService != null && playbackService.isStreaming();
+    }
+
+    private void initServiceNotRunning() {
+        if (getPlayButton() == null) {
+            return;
+        }
+        Log.v(TAG, "initServiceNotRunning()");
+        mediaLoader = Maybe.create((MaybeOnSubscribe<Playable>) emitter -> {
+            Playable media = getMedia();
+            if (media != null) {
+                emitter.onSuccess(media);
+            } else {
+                emitter.onComplete();
+            }
+        })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(media -> {
+                if (media.getMediaType() == MediaType.AUDIO) {
+                    getPlayButton().setImageResource(
+                            ThemeUtils.getDrawableFromAttr(activity, de.danoeh.antennapod.core.R.attr.av_play));
+                } else {
+                    getPlayButton().setImageResource(R.drawable.ic_av_play_white_80dp);
+                }
+            }, error -> Log.e(TAG, Log.getStackTraceString(error)));
     }
 }

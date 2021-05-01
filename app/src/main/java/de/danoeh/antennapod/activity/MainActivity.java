@@ -41,7 +41,6 @@ import de.danoeh.antennapod.core.preferences.UserPreferences;
 import de.danoeh.antennapod.core.receiver.MediaButtonReceiver;
 import de.danoeh.antennapod.core.service.playback.PlaybackService;
 import de.danoeh.antennapod.core.util.StorageUtils;
-import de.danoeh.antennapod.fragment.ItemDescriptionFragment;
 import de.danoeh.antennapod.ui.common.ThemeUtils;
 import de.danoeh.antennapod.core.util.download.AutoUpdateManager;
 import de.danoeh.antennapod.dialog.RatingDialog;
@@ -167,15 +166,10 @@ public class MainActivity extends CastEnabledActivity {
         outState.putInt(KEY_GENERATED_VIEW_ID, ViewCompat.generateViewId());
     }
 
-    private final BottomSheetBehavior.BottomSheetCallback bottomSheetCallback =
+    private BottomSheetBehavior.BottomSheetCallback bottomSheetCallback =
             new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View view, int state) {
-            if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-                onSlide(view, 0.0f);
-            } else if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                onSlide(view, 1.0f);
-            }
         }
 
         @Override
@@ -185,8 +179,6 @@ public class MainActivity extends CastEnabledActivity {
             if (audioPlayer == null) {
                 return;
             }
-            audioPlayer.backToCover(true);
-
             float condensedSlideOffset = Math.max(0.0f, Math.min(0.2f, slideOffset - 0.2f)) / 0.2f;
             audioPlayer.getExternalPlayerHolder().setAlpha(1 - condensedSlideOffset);
             audioPlayer.getExternalPlayerHolder().setVisibility(
@@ -196,9 +188,7 @@ public class MainActivity extends CastEnabledActivity {
 
     public void setupToolbarToggle(@NonNull Toolbar toolbar, boolean displayUpArrow) {
         if (drawerLayout != null) { // Tablet layout does not have a drawer
-            if (drawerToggle != null) {
-                drawerLayout.removeDrawerListener(drawerToggle);
-            }
+            drawerLayout.removeDrawerListener(drawerToggle);
             drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
                     R.string.drawer_open, R.string.drawer_close);
             drawerLayout.addDrawerListener(drawerToggle);

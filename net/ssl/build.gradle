@@ -50,7 +50,6 @@ android {
 
     lintOptions {
         disable 'GradleDependency'
-        checkDependencies true
         warningsAsErrors true
         abortOnError true
     }

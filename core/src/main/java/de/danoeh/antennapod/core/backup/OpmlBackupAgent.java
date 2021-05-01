@@ -94,7 +94,7 @@ public class OpmlBackupAgent extends BackupAgentHelper {
 
                         if (len != -1) {
                             byte[] oldChecksum = new byte[len];
-                            IOUtils.read(inState, oldChecksum, 0, len);
+                            inState.read(oldChecksum);
                             Log.d(TAG, "Old checksum: " + new BigInteger(1, oldChecksum).toString(16));
 
                             if (Arrays.equals(oldChecksum, newChecksum)) {

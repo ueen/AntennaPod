@@ -20,6 +20,7 @@ import de.danoeh.antennapod.core.storage.DBReader;
 import de.danoeh.antennapod.core.storage.DBTasks;
 import de.danoeh.antennapod.core.storage.DownloadRequestException;
 import de.danoeh.antennapod.core.storage.DownloadRequester;
+import de.danoeh.antennapod.ui.common.ThemeUtils;
 import de.danoeh.antennapod.view.viewholder.DownloadItemViewHolder;
 
 /**
@@ -81,7 +82,8 @@ public class DownloadLogAdapter extends BaseAdapter {
                 holder.secondaryActionButton.setOnClickListener(null);
                 holder.secondaryActionButton.setTag(null);
             } else {
-                holder.secondaryActionIcon.setImageResource(R.drawable.ic_refresh);
+                holder.secondaryActionIcon.setImageResource(
+                        ThemeUtils.getDrawableFromAttr(context, R.attr.navigation_refresh));
                 holder.secondaryActionButton.setVisibility(View.VISIBLE);
 
                 if (status.getFeedfileType() == Feed.FEEDFILETYPE_FEED) {

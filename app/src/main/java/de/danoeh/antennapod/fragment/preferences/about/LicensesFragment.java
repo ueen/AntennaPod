@@ -95,7 +95,7 @@ public class LicensesFragment extends ListFragment {
     private void showLicenseText(String licenseTextFile) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    getContext().getAssets().open(licenseTextFile), "UTF-8"));
+                    getContext().getAssets().open(licenseTextFile)));
             StringBuilder licenseText = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {

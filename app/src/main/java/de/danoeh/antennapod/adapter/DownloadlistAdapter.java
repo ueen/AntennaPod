@@ -15,6 +15,7 @@ import de.danoeh.antennapod.core.feed.FeedMedia;
 import de.danoeh.antennapod.core.service.download.DownloadRequest;
 import de.danoeh.antennapod.core.service.download.DownloadStatus;
 import de.danoeh.antennapod.core.service.download.Downloader;
+import de.danoeh.antennapod.ui.common.ThemeUtils;
 import de.danoeh.antennapod.ui.common.CircularProgressBar;
 
 public class DownloadlistAdapter extends BaseAdapter {
@@ -63,7 +64,7 @@ public class DownloadlistAdapter extends BaseAdapter {
         }
 
         holder.title.setText(request.getTitle());
-        holder.secondaryActionIcon.setImageResource(R.drawable.ic_cancel);
+        holder.secondaryActionIcon.setImageResource(ThemeUtils.getDrawableFromAttr(context, R.attr.navigation_cancel));
         holder.secondaryActionButton.setContentDescription(context.getString(R.string.cancel_download_label));
         holder.secondaryActionButton.setTag(downloader);
         holder.secondaryActionButton.setOnClickListener(butSecondaryListener);

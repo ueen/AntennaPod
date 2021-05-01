@@ -2,7 +2,7 @@ package de.danoeh.antennapod.adapter.actionbutton;
 
 import android.content.Context;
 import android.view.View;
-import androidx.annotation.DrawableRes;
+import androidx.annotation.AttrRes;
 import androidx.annotation.StringRes;
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.core.feed.FeedItem;
@@ -21,9 +21,9 @@ public class VisitWebsiteActionButton extends ItemActionButton {
     }
 
     @Override
-    @DrawableRes
+    @AttrRes
     public int getDrawable() {
-        return R.drawable.ic_web;
+        return R.attr.location_web_site;
     }
 
     @Override

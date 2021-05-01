@@ -249,7 +249,7 @@ public class FeedItemMenuHandler {
         final Handler h = new Handler(fragment.requireContext().getMainLooper());
         final Runnable r = () -> {
             FeedMedia media = item.getMedia();
-            if (media != null && FeedItemUtil.hasAlmostEnded(media) && UserPreferences.isAutoDelete()) {
+            if (media != null && media.hasAlmostEnded() && UserPreferences.isAutoDelete()) {
                 DBWriter.deleteFeedMediaOfItem(fragment.requireContext(), media.getId());
             }
         };

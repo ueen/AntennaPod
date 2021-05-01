@@ -63,7 +63,7 @@ public abstract class FeedCursorMapper {
                 cursor.getInt(indexLastUpdateFailed) > 0
         );
 
-        FeedPreferences preferences = FeedPreferencesCursorMapper.convert(cursor);
+        FeedPreferences preferences = FeedPreferences.fromCursor(cursor);
         feed.setPreferences(preferences);
         return feed;
     }

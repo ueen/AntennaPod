@@ -28,6 +28,7 @@ import de.danoeh.antennapod.core.storage.DownloadRequester;
 import de.danoeh.antennapod.core.util.FeedItemPermutors;
 import de.danoeh.antennapod.core.util.LongList;
 import de.danoeh.antennapod.core.util.SortOrder;
+import de.danoeh.antennapod.ui.common.ThemeUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -214,10 +215,10 @@ public class EpisodesApplyActionFragment extends Fragment implements Toolbar.OnM
     public void refreshToolbarState() {
         MenuItem selectAllItem = toolbar.getMenu().findItem(R.id.select_toggle);
         if (checkedIds.size() == episodes.size()) {
-            selectAllItem.setIcon(R.drawable.ic_select_none);
+            selectAllItem.setIcon(ThemeUtils.getDrawableFromAttr(getContext(), R.attr.ic_select_none));
             selectAllItem.setTitle(R.string.deselect_all_label);
         } else {
-            selectAllItem.setIcon(R.drawable.ic_select_all);
+            selectAllItem.setIcon(ThemeUtils.getDrawableFromAttr(getContext(), R.attr.ic_select_all));
             selectAllItem.setTitle(R.string.select_all_label);
         }
     }

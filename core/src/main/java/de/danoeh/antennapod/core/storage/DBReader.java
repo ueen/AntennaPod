@@ -24,11 +24,7 @@ import de.danoeh.antennapod.core.feed.FeedPreferences;
 import de.danoeh.antennapod.core.feed.SubscriptionsFilter;
 import de.danoeh.antennapod.core.preferences.UserPreferences;
 import de.danoeh.antennapod.core.service.download.DownloadStatus;
-import de.danoeh.antennapod.core.storage.mapper.ChapterCursorMapper;
 import de.danoeh.antennapod.core.storage.mapper.FeedCursorMapper;
-import de.danoeh.antennapod.core.storage.mapper.FeedItemCursorMapper;
-import de.danoeh.antennapod.core.storage.mapper.FeedMediaCursorMapper;
-import de.danoeh.antennapod.core.storage.mapper.FeedPreferencesCursorMapper;
 import de.danoeh.antennapod.core.util.LongIntMap;
 import de.danoeh.antennapod.core.util.LongList;
 import de.danoeh.antennapod.core.util.comparator.DownloadStatusComparator;
@@ -203,10 +199,10 @@ public final class DBReader {
         if (cursor.moveToFirst()) {
             int indexMediaId = cursor.getColumnIndexOrThrow(PodDBAdapter.SELECT_KEY_MEDIA_ID);
             do {
-                FeedItem item = FeedItemCursorMapper.convert(cursor);
+                FeedItem item = FeedItem.fromCursor(cursor);
                 result.add(item);
                 if (!cursor.isNull(indexMediaId)) {
-                    item.setMedia(FeedMediaCursorMapper.convert(cursor));
+                    item.setMedia(FeedMedia.fromCursor(cursor));
                 }
             } while (cursor.moveToNext());
         }
@@ -215,7 +211,7 @@ public final class DBReader {
 
     private static Feed extractFeedFromCursorRow(Cursor cursor) {
         Feed feed = FeedCursorMapper.convert(cursor);
-        FeedPreferences preferences = FeedPreferencesCursorMapper.convert(cursor);
+        FeedPreferences preferences = FeedPreferences.fromCursor(cursor);
         feed.setPreferences(preferences);
         return feed;
     }
@@ -691,7 +687,7 @@ public final class DBReader {
             }
             ArrayList<Chapter> chapters = new ArrayList<>();
             while (cursor.moveToNext()) {
-                chapters.add(ChapterCursorMapper.convert(cursor));
+                chapters.add(Chapter.fromCursor(cursor));
             }
             return chapters;
         }
@@ -733,7 +729,7 @@ public final class DBReader {
 
             int indexFeedItem = mediaCursor.getColumnIndex(PodDBAdapter.KEY_FEEDITEM);
             long itemId = mediaCursor.getLong(indexFeedItem);
-            FeedMedia media = FeedMediaCursorMapper.convert(mediaCursor);
+            FeedMedia media = FeedMedia.fromCursor(mediaCursor);
             FeedItem item = getFeedItem(itemId);
             if (item != null) {
                 media.setItem(item);
