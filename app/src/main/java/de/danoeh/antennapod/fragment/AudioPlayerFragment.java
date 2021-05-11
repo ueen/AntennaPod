@@ -417,6 +417,7 @@ public class AudioPlayerFragment extends Fragment implements
         EventBus.getDefault().register(this);
         txtvRev.setText(NumberFormat.getInstance().format(UserPreferences.getRewindSecs()));
         txtvFF.setText(NumberFormat.getInstance().format(UserPreferences.getFastForwardSecs()));
+        scrollToPage(POS_COVER);
     }
 
     @Override

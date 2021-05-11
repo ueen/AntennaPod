@@ -72,7 +72,6 @@ public class AllEpisodesFragment extends EpisodesListFragment {
     }
 
     public void loadMenuCheked(Menu menu) {
-        menu.findItem(R.id.inbox_mode_item).setChecked(inboxMode);
         menu.findItem(R.id.paused_first_item).setChecked(pausedOnTop);
     }
 
