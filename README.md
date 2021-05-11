@@ -1,6 +1,6 @@
-# AntennaPod
+# AntennaPod [Cool]
 
-This is the official repository of AntennaPod, the easy-to-use, flexible and open-source podcast manager for Android.
+This my modification of AP to make it cooler ;)
 
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
       alt="Get it on Google Play"
