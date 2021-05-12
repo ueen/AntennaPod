@@ -41,11 +41,6 @@ import java.util.Set;
  */
 public class AllEpisodesFragment extends EpisodesListFragment {
     private static final String PREF_NAME = "PrefAllEpisodesFragment";
-    private static final String PREF_FIRSTSWIPE = "firstswipe";
-    private static final String PREF_SWIPEACTIONS = "swipeactions";
-    private static final String SWIPEACTIONS_ADDTOQUEUE = "ADDTOQUEUE";
-    private static final String SWIPEACTIONS_MARKPLAYED = "MARKPLAYED";
-    private static final String SWIPEACTIONS_MARKUNPLAYED = "MARKUNPLAYED";
     private static final String PREF_PAUSEDFIRST = "pausedfirst";
     private static final String PREF_FILTER = "filter";
 
@@ -121,6 +116,8 @@ public class AllEpisodesFragment extends EpisodesListFragment {
         } else {
             txtvInformation.setVisibility(View.GONE);
         }
+
+        resetItemTouchHelper();
     }
 
     private void showFilterDialog() {
@@ -146,24 +143,8 @@ public class AllEpisodesFragment extends EpisodesListFragment {
     ItemTouchHelper itemTouchHelper;
 
     public void setSwipeAction(){
-        SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        itemTouchHelper = SwipeActions.itemTouchHelper(this);
 
-        if (itemTouchHelper != null) {
-            itemTouchHelper.attachToRecyclerView(null);
-        }
-
-        ItemTouchHelper.SimpleCallback simpleItemTouchCallback;
-        if (prefs.getBoolean(PREF_FIRSTSWIPE, true)) {
-            //first swipe, ask what should happen
-            simpleItemTouchCallback = firstSwipe();
-        } else if (prefs.getString(PREF_SWIPEACTIONS, "").isEmpty()) {
-            //Do nothing if there are no actions
-            return;
-        } else {
-            simpleItemTouchCallback = swipeActions();
-        }
-
-        itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
@@ -184,25 +165,13 @@ public class AllEpisodesFragment extends EpisodesListFragment {
                 builder.setNegativeButton("normal mode", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-
-                        SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-                        prefs.edit().putBoolean(PREF_FIRSTSWIPE, false).apply();
-                        prefs.edit().putString(PREF_SWIPEACTIONS, SWIPEACTIONS_MARKPLAYED+","+SWIPEACTIONS_MARKPLAYED).apply();
-                        ((HomeFragment) requireParentFragment()).setQuickFilterPosition(HomeFragment.QUICKFILTER_ALL);
-                        resetItem(viewHolder);
-                        setSwipeAction();
+                        //TODO
                     }
                 });
                 builder.setPositiveButton("inbox mode", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-
-                        SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-                        prefs.edit().putBoolean(PREF_FIRSTSWIPE, false).apply();
-                        prefs.edit().putString(PREF_SWIPEACTIONS, SWIPEACTIONS_ADDTOQUEUE+","+SWIPEACTIONS_MARKUNPLAYED).apply();
-                        ((HomeFragment) requireParentFragment()).setQuickFilterPosition(HomeFragment.QUICKFILTER_NEW);
-                        resetItem(viewHolder);
-                        setSwipeAction();
+                        //TODO
                     }
                 });
                 builder.create().show();
@@ -211,83 +180,12 @@ public class AllEpisodesFragment extends EpisodesListFragment {
         };
     }
 
-    private ItemTouchHelper.SimpleCallback swipeActions() {
-        SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        String[] leftright = prefs.getString(PREF_SWIPEACTIONS,"").split(",");
-
-        return new ItemTouchHelper.SimpleCallback(0,
-                ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
-                                  RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                String action = leftright[swipeDir == ItemTouchHelper.RIGHT ? 0 : 1];
-
-                FeedItem item = ((EpisodeItemViewHolder) viewHolder).getFeedItem();
-                switch (action) {
-                    case SWIPEACTIONS_ADDTOQUEUE:
-                        FeedItemMenuHandler.addToQueue(requireActivity(),item);
-                        break;
-                    case SWIPEACTIONS_MARKPLAYED:
-                        FeedItemMenuHandler.removeNewFlagWithUndo(AllEpisodesFragment.this,
-                                item, FeedItem.PLAYED);
-                        break;
-                    case SWIPEACTIONS_MARKUNPLAYED:
-                        FeedItemMenuHandler.removeNewFlagWithUndo(AllEpisodesFragment.this,
-                                item, FeedItem.UNPLAYED);
-                        break;
-                }
-                resetItem(viewHolder);
-            }
-
-            @Override
-            public void onChildDraw (Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,float dX, float dY,int actionState, boolean isCurrentlyActive){
-                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                        .addSwipeRightBackgroundColor(actionColorFor(leftright[0]))
-                        .addSwipeRightActionIcon(actionIconFor(leftright[0]))
-                        .addSwipeLeftBackgroundColor(actionColorFor(leftright[1]))
-                        .addSwipeLeftActionIcon(actionIconFor(leftright[1]))
-                        .create()
-                        .decorate();
-
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-            }
-        };
-    }
-
-    private int actionIconFor(String swipeAction) {
-        switch (swipeAction) {
-            case SWIPEACTIONS_ADDTOQUEUE:
-                return R.drawable.ic_playlist;
-            case SWIPEACTIONS_MARKPLAYED:
-                return R.drawable.ic_check;
-            default:
-            case SWIPEACTIONS_MARKUNPLAYED:
-                return R.drawable.ic_check;
+    private void resetItemTouchHelper() {
+        //prevent swipe staying if item is staying in the list
+        if (itemTouchHelper != null && recyclerView != null) {
+            itemTouchHelper.attachToRecyclerView(null);
+            itemTouchHelper.attachToRecyclerView(recyclerView);
         }
-    }
-    private int actionColorFor(String swipeAction) {
-        int color;
-        switch (swipeAction) {
-            case SWIPEACTIONS_ADDTOQUEUE:
-                color = R.color.swipe_light_green_200;
-            case SWIPEACTIONS_MARKPLAYED:
-                color = R.color.swipe_light_blue_200;
-            default:
-            case SWIPEACTIONS_MARKUNPLAYED:
-                color = R.color.swipe_light_blue_200;
-        }
-        return ContextCompat.getColor(requireActivity(), color);
-    }
-
-    private void resetItem(RecyclerView.ViewHolder viewHolder) {
-        listAdapter.notifyItemChangedCompat(viewHolder.getBindingAdapterPosition());
-        itemTouchHelper.attachToRecyclerView(null);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
     @Override
