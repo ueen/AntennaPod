@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -13,11 +14,13 @@ import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,8 +45,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.ArrayList;
 
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.activity.MainActivity;
@@ -157,6 +158,29 @@ public class CoverFragment extends Fragment {
         txtvPodcastTitle.setOnClickListener(v -> startActivity(openFeed));
         txtvPodcastTitle.setOnLongClickListener(v -> copyText(media.getFeedTitle()));
         txtvEpisodeTitle.setText(media.getEpisodeTitle());
+        txtvEpisodeTitle.setOnClickListener(v -> {
+            int lines = txtvEpisodeTitle.getLineCount();
+            int animUnit = 1500;
+            if (lines > txtvEpisodeTitle.getMaxLines()) {
+                ObjectAnimator verticalMarquee = ObjectAnimator.ofInt(
+                        txtvEpisodeTitle, "scrollY", 0, txtvEpisodeTitle.getHeight())
+                        .setDuration(lines*animUnit);
+                ObjectAnimator fadeOut = ObjectAnimator.ofFloat(
+                        txtvEpisodeTitle, "alpha", 0);
+                fadeOut.setStartDelay(animUnit);
+                fadeOut.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        txtvEpisodeTitle.scrollTo(0,0);
+                    }
+                });
+                ObjectAnimator fadeBackIn = ObjectAnimator.ofFloat(
+                        txtvEpisodeTitle, "alpha", 1);
+                AnimatorSet set = new AnimatorSet();
+                set.playSequentially(verticalMarquee,fadeOut,fadeBackIn);
+                set.start();
+            }
+        });
         txtvEpisodeTitle.setOnLongClickListener(v -> copyText(media.getEpisodeTitle()));
         displayedChapterIndex = -1;
         refreshChapterData(ChapterUtils.getCurrentChapterIndex(media, media.getPosition())); //calls displayCoverImage
