@@ -7,9 +7,11 @@ import android.graphics.Canvas;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +20,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.Slide;
+import androidx.transition.Transition;
+import androidx.transition.TransitionManager;
 
 import com.joanzapata.iconify.Iconify;
 import de.danoeh.antennapod.R;
