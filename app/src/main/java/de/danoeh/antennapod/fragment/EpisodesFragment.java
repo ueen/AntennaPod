@@ -37,7 +37,7 @@ public class EpisodesFragment extends EpisodesListFragment {
 
     public static final String TAG = "PowerEpisodesFragment";
     private static final String PREF_NAME = "PrefPowerEpisodesFragment";
-    private static final String PREF_POSITION = "lastquickfilter";
+    private static final String PREF_POSITION = "lastquickfilterposition";
 
     public static final String PREF_FILTER = "filter";
 
@@ -64,23 +64,11 @@ public class EpisodesFragment extends EpisodesListFragment {
 
         toolbar.setTitle(R.string.episodes_label);
 
-        //setUpQuickFilter();
-
         setSwipeActions(TAG);
 
+        setUpQuickFilter();
+
         return  rootView;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        updateFloatingFilterButton(prefs.getString(PREF_POSITION, QUICKFILTER_ALL));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
     }
 
     public String getPrefFilter() {
@@ -88,35 +76,47 @@ public class EpisodesFragment extends EpisodesListFragment {
         return prefs.getString(PREF_FILTER, "");
     }
 
-    private void updateFloatingFilterButton(String id) {
+    private void setUpQuickFilter() {
+        quickfilter.setVisibility(View.VISIBLE);
+        quickfilter.addSubmarineItems(quickfilters);
+        quickfilter.setSubmarineItemClickListener((i, sub) -> setQuickFilter(i));
+        quickfilter.setOnClickListener(view -> quickfilter.navigates());
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        setQuickFilter(prefs.getInt(PREF_POSITION, 0));
+    }
+
+    private void setQuickFilter(int position) {
         String newFilter;
-        int menuitemId;
-        switch (id) {
+        switch (position) {
             default:
-            case EpisodesListFragment.QUICKFILTER_ALL:
+            case 0:
                 newFilter = getPrefFilter();
-                menuitemId = R.id.filter_all;
                 break;
-            case EpisodesListFragment.QUICKFILTER_UNPLAYED:
+            case 1:
                 newFilter = FeedItemFilter.UNPLAYED;
-                menuitemId = R.id.filter_unplayed;
                 break;
-            case EpisodesListFragment.QUICKFILTER_DOWNLOADED:
+            case 2:
                 newFilter = FeedItemFilter.DOWNLOADED;
-                menuitemId = R.id.filter_downloaded;
                 break;
-            case EpisodesListFragment.QUICKFILTER_FAV:
+            case 3:
                 newFilter = FeedItemFilter.IS_FAVORITE;
-                menuitemId = R.id.filter_favorites;
                 break;
         }
 
-        //floatingQuickFilterButton.setImageDrawable(quickFilterBar.getMenu().findItem(menuitemId).getIcon());
+        quickfilter.getCircleIcon().setImageDrawable(quickfilters.get(position).getIcon());
 
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(PREF_POSITION, id).apply();
+        prefs.edit().putInt(PREF_POSITION, position).apply();
+
+        setEmptyView(EpisodesFragment.TAG + position);
 
         updateFeedItemFilter(newFilter);
+    }
+
+    public void updateFeedItemFilter(String strings) {
+        feedItemFilter = new FeedItemFilter(strings);
+        swipeActions.setFilter(feedItemFilter);
+        loadItems();
     }
 
     @Override
@@ -129,7 +129,7 @@ public class EpisodesFragment extends EpisodesListFragment {
         if (!super.onMenuItemClick(item)) {
             if (item.getItemId() == R.id.filter_items) {
                 AutoUpdateManager.runImmediate(requireContext());
-                updateFloatingFilterButton(QUICKFILTER_ALL);
+                setQuickFilter(0);
                 showFilterDialog();
             } else {
                 return false;
@@ -185,12 +185,6 @@ public class EpisodesFragment extends EpisodesListFragment {
         filterDialog.openDialog();
     }
 
-    public void updateFeedItemFilter(String strings) {
-        feedItemFilter = new FeedItemFilter(strings);
-        swipeActions.setFilter(feedItemFilter);
-        loadItems();
-    }
-
     @Override
     protected boolean shouldUpdatedItemRemainInList(FeedItem item) {
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -210,8 +204,7 @@ public class EpisodesFragment extends EpisodesListFragment {
     }
 
     private List<FeedItem> load(int offset) {
-        int limit = EPISODES_PER_PAGE;
-        return DBReader.getRecentlyPublishedEpisodes(offset, limit, feedItemFilter);
+        return DBReader.getRecentlyPublishedEpisodes(offset, EPISODES_PER_PAGE, feedItemFilter);
     }
 
     @Override

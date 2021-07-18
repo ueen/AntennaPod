@@ -15,17 +15,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.skydoves.submarine.SubmarineItem;
+import com.skydoves.submarine.SubmarineView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import de.danoeh.antennapod.R;
@@ -66,10 +72,8 @@ public abstract class EpisodesListFragment extends Fragment implements Toolbar.O
     protected static final int EPISODES_PER_PAGE = 150;
     private static final String KEY_UP_ARROW = "up_arrow";
 
-    public static final String QUICKFILTER_ALL = "QUICKFILTER_ALL";
-    public static final String QUICKFILTER_UNPLAYED = "QUICKFILTER_UNPLAYED";
-    public static final String QUICKFILTER_DOWNLOADED = "QUICKFILTER_DOWNLOADED";
-    public static final String QUICKFILTER_FAV = "QUICKFILTER_FAV";
+    protected List<SubmarineItem> quickfilters;
+    protected SubmarineView quickfilter;
 
     protected int page = 1;
     protected boolean isLoadingMore = false;
@@ -203,6 +207,17 @@ public abstract class EpisodesListFragment extends Fragment implements Toolbar.O
         return FeedItemMenuHandler.onMenuItemClicked(this, item.getItemId(), selectedItem);
     }
 
+    @Override
+    public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        quickfilters = Arrays.asList(
+                new SubmarineItem(ContextCompat.getDrawable(requireContext(), R.drawable.ic_list)),
+                new SubmarineItem(ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_24dp)),
+                new SubmarineItem(ContextCompat.getDrawable(requireContext(), R.drawable.ic_download)),
+                new SubmarineItem(ContextCompat.getDrawable(requireContext(), R.drawable.ic_star))
+        );
+    }
+
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -232,7 +247,7 @@ public abstract class EpisodesListFragment extends Fragment implements Toolbar.O
 
         emptyView = new EmptyViewHandler(getContext());
         emptyView.attachToRecyclerView(recyclerView);
-        setEmptyView(EpisodesFragment.TAG + QUICKFILTER_ALL);
+        setEmptyView(EpisodesFragment.TAG + 0);
 
         createRecycleAdapter(recyclerView, emptyView);
         emptyView.hide();
@@ -242,6 +257,8 @@ public abstract class EpisodesListFragment extends Fragment implements Toolbar.O
         toolbar.inflateMenu(R.menu.episodes);
         toolbar.setOnMenuItemClickListener(this);
         onPrepareOptionsMenu(toolbar.getMenu());
+
+        quickfilter = root.findViewById(R.id.quickfilters);
 
         MenuItemUtils.setupSearchItem(toolbar.getMenu(), (MainActivity) getActivity(), 0, "");
 
@@ -259,18 +276,18 @@ public abstract class EpisodesListFragment extends Fragment implements Toolbar.O
     public void setEmptyView(String tag) {
         switch (tag) {
             default:
-            case EpisodesFragment.TAG + QUICKFILTER_ALL:
-            case EpisodesFragment.TAG + QUICKFILTER_UNPLAYED:
+            case EpisodesFragment.TAG + 0:
+            case EpisodesFragment.TAG + 1:
                 emptyView.setIcon(R.drawable.ic_feed);
                 emptyView.setTitle(R.string.no_all_episodes_head_label);
                 emptyView.setMessage(R.string.no_all_episodes_label);
                 break;
-            case EpisodesFragment.TAG + QUICKFILTER_DOWNLOADED:
+            case EpisodesFragment.TAG + 2:
                 emptyView.setIcon(R.drawable.ic_download);
                 emptyView.setTitle(R.string.no_comp_downloads_head_label);
                 emptyView.setMessage(R.string.no_comp_downloads_label);
                 break;
-            case EpisodesFragment.TAG + QUICKFILTER_FAV:
+            case EpisodesFragment.TAG + 3:
                 emptyView.setIcon(R.drawable.ic_star);
                 emptyView.setTitle(R.string.no_fav_episodes_head_label);
                 emptyView.setMessage(R.string.no_fav_episodes_label);
