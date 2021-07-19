@@ -26,6 +26,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import de.danoeh.antennapod.R;
@@ -46,6 +48,13 @@ import de.danoeh.antennapod.core.storage.DBWriter;
 import de.danoeh.antennapod.core.storage.DownloadRequester;
 import de.danoeh.antennapod.core.util.FeedItemUtil;
 import de.danoeh.antennapod.core.util.download.AutoUpdateManager;
+import de.danoeh.antennapod.fragment.swipeactions.AddToQueueSwipeAction;
+import de.danoeh.antennapod.fragment.swipeactions.MarkFavoriteSwipeAction;
+import de.danoeh.antennapod.fragment.swipeactions.MarkPlayedSwipeAction;
+import de.danoeh.antennapod.fragment.swipeactions.RemoveFromInboxSwipeAction;
+import de.danoeh.antennapod.fragment.swipeactions.RemoveFromQueueSwipeAction;
+import de.danoeh.antennapod.fragment.swipeactions.StartDownloadSwipeAction;
+import de.danoeh.antennapod.fragment.swipeactions.SwipeAction;
 import de.danoeh.antennapod.fragment.swipeactions.SwipeActions;
 import de.danoeh.antennapod.menuhandler.FeedItemMenuHandler;
 import de.danoeh.antennapod.menuhandler.MenuItemUtils;
@@ -54,6 +63,7 @@ import de.danoeh.antennapod.model.feed.FeedItemFilter;
 import de.danoeh.antennapod.view.EmptyViewHandler;
 import de.danoeh.antennapod.view.EpisodeItemListRecyclerView;
 import de.danoeh.antennapod.view.viewholder.EpisodeItemViewHolder;
+import de.ueen.fabmenu.FloatingActionMenu;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -68,10 +78,14 @@ public abstract class EpisodesListFragment extends Fragment implements Toolbar.O
     protected static final int EPISODES_PER_PAGE = 150;
     private static final String KEY_UP_ARROW = "up_arrow";
 
-    public static final int QUICKFILTER_ALL = 0;
-    public static final int QUICKFILTER_NEW = 1;
-    public static final int QUICKFILTER_DOWNLOADED = 2;
-    public static final int QUICKFILTER_FAV = 3;
+    public static final List<FloatingActionMenu.ActionItem> quickfilters =
+            Collections.unmodifiableList(
+            Arrays.asList(new FloatingActionMenu.ActionItem(R.drawable.ic_list, "ALL", ""),
+                    new FloatingActionMenu.ActionItem(R.drawable.ic_play_24dp, FeedItemFilter.UNPLAYED, ""),
+                    new FloatingActionMenu.ActionItem(R.drawable.ic_download, FeedItemFilter.DOWNLOADED, ""),
+                    new FloatingActionMenu.ActionItem(R.drawable.ic_star, FeedItemFilter.IS_FAVORITE, "")
+            )
+    );
 
     protected int page = 1;
     protected boolean isLoadingMore = false;
@@ -237,7 +251,7 @@ public abstract class EpisodesListFragment extends Fragment implements Toolbar.O
 
         emptyView = new EmptyViewHandler(getContext());
         emptyView.attachToRecyclerView(recyclerView);
-        setEmptyView(EpisodesFragment.TAG + QUICKFILTER_ALL);
+        setEmptyView(EpisodesFragment.TAG);
 
         createRecycleAdapter(recyclerView, emptyView);
         emptyView.hide();
@@ -264,18 +278,18 @@ public abstract class EpisodesListFragment extends Fragment implements Toolbar.O
     public void setEmptyView(String tag) {
         switch (tag) {
             default:
-            case EpisodesFragment.TAG + QUICKFILTER_ALL:
-            case EpisodesFragment.TAG + QUICKFILTER_NEW:
+            case EpisodesFragment.TAG:
+            case EpisodesFragment.TAG + FeedItemFilter.UNPLAYED:
                 emptyView.setIcon(R.drawable.ic_feed);
                 emptyView.setTitle(R.string.no_all_episodes_head_label);
                 emptyView.setMessage(R.string.no_all_episodes_label);
                 break;
-            case EpisodesFragment.TAG + QUICKFILTER_DOWNLOADED:
+            case EpisodesFragment.TAG + FeedItemFilter.DOWNLOADED:
                 emptyView.setIcon(R.drawable.ic_download);
                 emptyView.setTitle(R.string.no_comp_downloads_head_label);
                 emptyView.setMessage(R.string.no_comp_downloads_label);
                 break;
-            case EpisodesFragment.TAG + QUICKFILTER_FAV:
+            case EpisodesFragment.TAG + FeedItemFilter.IS_FAVORITE:
                 emptyView.setIcon(R.drawable.ic_star);
                 emptyView.setTitle(R.string.no_fav_episodes_head_label);
                 emptyView.setMessage(R.string.no_fav_episodes_label);

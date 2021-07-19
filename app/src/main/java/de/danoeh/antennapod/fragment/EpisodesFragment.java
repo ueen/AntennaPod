@@ -14,7 +14,7 @@ import androidx.transition.ChangeBounds;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
 
-import com.addisonelliott.segmentedbutton.SegmentedButtonGroup;
+import com.annimon.stream.Stream;
 import com.joanzapata.iconify.Iconify;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,19 +23,19 @@ import java.util.List;
 import java.util.Set;
 
 import de.danoeh.antennapod.R;
-import de.danoeh.antennapod.activity.MainActivity;
 import de.danoeh.antennapod.core.storage.DBReader;
 import de.danoeh.antennapod.core.util.download.AutoUpdateManager;
 import de.danoeh.antennapod.dialog.FilterDialog;
 import de.danoeh.antennapod.model.feed.FeedItem;
 import de.danoeh.antennapod.model.feed.FeedItemFilter;
 import de.danoeh.antennapod.view.EmptyViewHandler;
+import de.ueen.fabmenu.FloatingActionMenu;
 
 public class EpisodesFragment extends EpisodesListFragment {
 
     public static final String TAG = "PowerEpisodesFragment";
     private static final String PREF_NAME = "PrefPowerEpisodesFragment";
-    private static final String PREF_POSITION = "position";
+    private static final String PREF_POSITION = "lastquickfilter";
 
     public static final String PREF_FILTER = "filter";
 
@@ -48,7 +48,7 @@ public class EpisodesFragment extends EpisodesListFragment {
         this.hideToolbar = hideToolbar;
     }
 
-    private SegmentedButtonGroup floatingQuickFilter;
+    private FloatingActionMenu floatingQuickFilter;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,60 +64,23 @@ public class EpisodesFragment extends EpisodesListFragment {
 
         toolbar.setTitle(R.string.episodes_label);
 
-        floatingQuickFilter = rootView.findViewById(R.id.floatingFilter);
-        floatingQuickFilter.setVisibility(View.VISIBLE);
-        floatingQuickFilter.setOnPositionChangedListener(position -> {
-            String newFilter;
-            switch (position) {
-                default:
-                case QUICKFILTER_ALL:
-                    newFilter = getPrefFilter();
-                    break;
-                case QUICKFILTER_NEW:
-                    newFilter = "unplayed";
-                    break;
-                case QUICKFILTER_DOWNLOADED:
-                    newFilter = "downloaded";
-                    break;
-                case QUICKFILTER_FAV:
-                    newFilter = "is_favorite";
-                    break;
-            }
-            updateFeedItemFilter(newFilter);
-        });
-
         setSwipeActions(TAG);
+
+        floatingQuickFilter = rootView.findViewById(R.id.fam);
+        setUpQuickFilter();
 
         return  rootView;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        setQuickFilterPosition(prefs.getInt(PREF_POSITION, QUICKFILTER_ALL));
-        loadArgsIfAvailable();
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
-        SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putInt(PREF_POSITION, floatingQuickFilter.getPosition()).apply();
+
     }
 
     public String getPrefFilter() {
         SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         return prefs.getString(PREF_FILTER, "");
-    }
-
-    private void loadArgsIfAvailable() {
-        if (getArguments() != null) {
-            int argumentsFilter = getArguments().getInt(PREF_FILTER, -1);
-            if (argumentsFilter >= 0) {
-                setQuickFilterPosition(argumentsFilter);
-            }
-        }
     }
 
 
@@ -126,16 +89,12 @@ public class EpisodesFragment extends EpisodesListFragment {
         return PREF_NAME;
     }
 
-    public void setQuickFilterPosition(int position) {
-        floatingQuickFilter.setPosition(position, false);
-    }
-
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         if (!super.onMenuItemClick(item)) {
             if (item.getItemId() == R.id.filter_items) {
                 AutoUpdateManager.runImmediate(requireContext());
-                setQuickFilterPosition(QUICKFILTER_ALL);
+                floatingQuickFilter.selectActionItemToFab(0);
                 showFilterDialog();
             } else {
                 return false;
@@ -145,9 +104,25 @@ public class EpisodesFragment extends EpisodesListFragment {
         return true;
     }
 
-    private void savePrefsBoolean(String s, Boolean b) {
+    private void setUpQuickFilter() {
         SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putBoolean(s, b).apply();
+
+        floatingQuickFilter.addActions(Stream.of(quickfilters).toArray(FloatingActionMenu.ActionItem[]::new));
+
+        floatingQuickFilter.setOnActionClickListener(true, actionItem -> {
+            setEmptyView(TAG + actionItem.getTag());
+
+            prefs.edit().putString(PREF_POSITION, actionItem.getTag()).apply();
+
+            updateFeedItemFilter(actionItem.getTag());
+        });
+
+        String lastpref = prefs.getString(PREF_POSITION, quickfilters.get(0).getTag());
+        floatingQuickFilter.selectActionItemToFab(lastpref);
+        updateFeedItemFilter(lastpref);
+
+        floatingQuickFilter.setVisibility(View.VISIBLE);
+
     }
 
     @Override
@@ -161,16 +136,6 @@ public class EpisodesFragment extends EpisodesListFragment {
     protected void onFragmentLoaded(List<FeedItem> episodes) {
         super.onFragmentLoaded(episodes);
 
-        //smoothly animate filter info
-        TransitionSet auto = new TransitionSet();
-        auto.addTransition(new ChangeBounds());
-        auto.excludeChildren(EmptyViewHandler.class, true);
-        auto.excludeChildren(R.id.swipeRefresh, true);
-        auto.excludeChildren(R.id.floatingFilter, true);
-        TransitionManager.beginDelayedTransition(
-                (ViewGroup) txtvInformation.getParent(),
-                auto);
-
         if (feedItemFilter.getValues().length > 0) {
             txtvInformation.setText("{md-info-outline} " + this.getString(R.string.filtered_label));
             Iconify.addIcons(txtvInformation);
@@ -179,7 +144,7 @@ public class EpisodesFragment extends EpisodesListFragment {
             txtvInformation.setVisibility(View.GONE);
         }
 
-        setEmptyView(TAG + floatingQuickFilter.getPosition());
+        setEmptyView(TAG);
     }
 
     private void showFilterDialog() {
@@ -197,8 +162,20 @@ public class EpisodesFragment extends EpisodesListFragment {
         filterDialog.openDialog();
     }
 
-    public void updateFeedItemFilter(String strings) {
-        feedItemFilter = new FeedItemFilter(strings);
+    public void updateFeedItemFilter(String tag) {
+        String newFilter;
+        switch (tag) {
+            default:
+                newFilter = getPrefFilter();
+                break;
+            case FeedItemFilter.UNPLAYED:
+            case FeedItemFilter.DOWNLOADED:
+            case FeedItemFilter.IS_FAVORITE:
+                newFilter = tag;
+                break;
+        }
+
+        feedItemFilter = new FeedItemFilter(newFilter);
         swipeActions.setFilter(feedItemFilter);
         loadItems();
     }

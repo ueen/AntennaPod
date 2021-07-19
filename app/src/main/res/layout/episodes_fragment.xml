@@ -30,12 +30,12 @@
             android:visibility="gone"
             tools:text="(i) Information" />
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/loadingMore"
-            android:layout_below="@+id/txtvInformation">
+            android:layout_below="@id/txtvInformation"
+            android:layout_above="@id/loadingMore">
 
             <de.danoeh.antennapod.view.EpisodeItemListRecyclerView
                 android:id="@android:id/list"
@@ -50,6 +50,16 @@
                 tools:listitem="@layout/feeditemlist_item" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <de.ueen.fabmenu.FloatingActionMenu
+            android:id="@+id/fam"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"
+            app:color="?attr/colorPrimary"
+            app:extrudeColor="?attr/colorPrimaryVariant" />
 
         <ProgressBar
             android:id="@+id/progLoading"
@@ -89,52 +99,6 @@
                 android:text="@string/loading_more" />
 
         </LinearLayout>
-
-        <com.addisonelliott.segmentedbutton.SegmentedButtonGroup
-            android:id="@+id/floatingFilter"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="16dp"
-            android:background="?attr/background_elevated"
-            android:elevation="6dp"
-            android:visibility="gone"
-            app:position="0"
-            app:radius="30dp"
-            app:rippleColor="?attr/colorControlHighlight"
-            app:selectedBackground="@color/highlight_light"
-            app:selectionAnimationDuration="50">
-
-            <com.addisonelliott.segmentedbutton.SegmentedButton
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="8dp"
-                app:drawable="@drawable/ic_list" />
-
-            <com.addisonelliott.segmentedbutton.SegmentedButton
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="8dp"
-                app:drawable="@drawable/ic_play_24dp" />
-
-            <com.addisonelliott.segmentedbutton.SegmentedButton
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="8dp"
-                app:drawable="@drawable/ic_download" />
-
-            <com.addisonelliott.segmentedbutton.SegmentedButton
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="8dp"
-                app:drawable="@drawable/ic_star" />
-
-        </com.addisonelliott.segmentedbutton.SegmentedButtonGroup>
 
     </RelativeLayout>
 
