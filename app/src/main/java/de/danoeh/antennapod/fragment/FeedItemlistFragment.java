@@ -31,6 +31,8 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.joanzapata.iconify.Iconify;
 import com.joanzapata.iconify.widget.IconTextView;
+import com.leinardi.android.speeddial.SpeedDialView;
+
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.activity.MainActivity;
 import de.danoeh.antennapod.adapter.EpisodeItemListAdapter;
@@ -103,6 +105,7 @@ public class FeedItemlistFragment extends Fragment implements AdapterView.OnItem
     private TextView txtvAuthor;
     private ImageButton butShowInfo;
     private ImageButton butShowSettings;
+    private SpeedDialView filterSpeedDial;
     private View header;
     private Toolbar toolbar;
     private ToolbarIconTintManager iconTintManager;
@@ -170,6 +173,7 @@ public class FeedItemlistFragment extends Fragment implements AdapterView.OnItem
         header = root.findViewById(R.id.headerContainer);
         AppBarLayout appBar = root.findViewById(R.id.appBar);
         CollapsingToolbarLayout collapsingToolbar = root.findViewById(R.id.collapsing_toolbar);
+        filterSpeedDial = root.findViewById(R.id.filterSpeedDial);
 
         iconTintManager = new ToolbarIconTintManager(getContext(), toolbar, collapsingToolbar) {
             @Override
@@ -219,6 +223,20 @@ public class FeedItemlistFragment extends Fragment implements AdapterView.OnItem
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> swipeRefreshLayout.setRefreshing(false),
                     getResources().getInteger(R.integer.swipe_to_refresh_duration_in_ms));
+        });
+
+        filterSpeedDial.setOnClickListener(view -> {
+            if (feed.getItemFilter(). != null) {
+
+            }
+        });
+        filterSpeedDial.setOnLongClickListener(view ->  {
+            filterSpeedDial.open();
+            return true;
+        });
+        filterSpeedDial.setOnActionSelectedListener(actionItem -> {
+
+            return true;
         });
 
         loadItems();
