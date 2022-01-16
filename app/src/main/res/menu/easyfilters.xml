@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/custom_easyfilter"
+        android:title="@string/edit_tags"
+        android:icon="@drawable/ic_fab_edit"
+        android:visible="true" />
+    <item
+        android:id="@+id/fav_easyfilter"
+        android:title="@string/favorite_episodes_label"
+        android:icon="@drawable/ic_star"
+        android:visible="true" />
+    <item
+        android:id="@+id/downloaded_easyfilter"
+        android:title="@string/hide_downloaded_episodes_label"
+        android:icon="@drawable/ic_download"
+        android:visible="true" />
+    <item
+        android:id="@+id/played_easyfilter"
+        android:title="@string/not_played"
+        android:icon="@drawable/ic_mark_played"
+        android:visible="true" />
+</menu>

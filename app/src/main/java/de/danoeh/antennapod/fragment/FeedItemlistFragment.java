@@ -114,6 +114,7 @@ public class FeedItemlistFragment extends Fragment implements AdapterView.OnItem
     private View header;
     private Toolbar toolbar;
     private SpeedDialView speedDialView;
+    private SpeedDialView filterSpeedDial;
 
     private boolean displayUpArrow;
 
@@ -250,6 +251,31 @@ public class FeedItemlistFragment extends Fragment implements AdapterView.OnItem
             adapter.endSelectMode();
             return true;
         });
+
+        //Init easy filter
+        filterSpeedDial = root.findViewById(R.id.filterSpeedDial);
+        filterSpeedDial.inflate(R.menu.easyfilters);
+        filterSpeedDial.setOnClickListener(view ->  {
+            filterSpeedDial.
+        });
+        filterSpeedDial.setOnLongClickListener(view -> {
+            filterSpeedDial.open();
+            return true;
+        });
+        filterSpeedDial.setOnActionSelectedListener(actionItem ->  {
+            if (actionItem.getId() == R.id.custom_easyfilter) {
+                openFilterDialog(feed);
+            } else if (actionItem.getId() == R.id.fav_easyfilter) {
+                feed.set
+            } else if (actionItem.getId() == R.id.downloaded_easyfilter) {
+
+            } else if (actionItem.getId() == R.id.played_easyfilter) {
+
+            }
+
+            return true;
+        });
+
         return root;
     }
 
@@ -511,15 +537,7 @@ public class FeedItemlistFragment extends Fragment implements AdapterView.OnItem
                 txtvInformation.setText("{md-info-outline} " + this.getString(R.string.filtered_label));
                 Iconify.addIcons(txtvInformation);
                 txtvInformation.setOnClickListener((l) -> {
-                    FilterDialog filterDialog = new FilterDialog(requireContext(), feed.getItemFilter()) {
-                        @Override
-                        protected void updateFilter(Set<String> filterValues) {
-                            feed.setItemFilter(filterValues.toArray(new String[0]));
-                            DBWriter.setFeedItemsFilter(feed.getId(), filterValues);
-                        }
-                    };
-
-                    filterDialog.openDialog();
+                    openFilterDialog(feed);
                 });
                 txtvInformation.setVisibility(View.VISIBLE);
             } else {
@@ -528,6 +546,18 @@ public class FeedItemlistFragment extends Fragment implements AdapterView.OnItem
         } else {
             txtvInformation.setVisibility(View.GONE);
         }
+    }
+
+    private void openFilterDialog(Feed feed) {
+        FilterDialog filterDialog = new FilterDialog(requireContext(), feed.getItemFilter()) {
+            @Override
+            protected void updateFilter(Set<String> filterValues) {
+                feed.setItemFilter(filterValues.toArray(new String[0]));
+                DBWriter.setFeedItemsFilter(feed.getId(), filterValues);
+            }
+        };
+
+        filterDialog.openDialog();
     }
 
     private void setupHeaderView() {
