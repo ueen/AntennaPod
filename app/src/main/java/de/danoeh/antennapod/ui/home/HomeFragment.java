@@ -42,6 +42,7 @@ import de.danoeh.antennapod.event.FeedListUpdateEvent;
 import de.danoeh.antennapod.event.FeedUpdateRunningEvent;
 import de.danoeh.antennapod.fragment.EpisodesFragementInHome;
 import de.danoeh.antennapod.fragment.InboxFragmentInHome;
+import de.danoeh.antennapod.fragment.AddFeedFragment;
 import de.danoeh.antennapod.fragment.SearchFragment;
 import de.danoeh.antennapod.storage.preferences.UserPreferences;
 import de.danoeh.antennapod.ui.echo.EchoActivity;
@@ -106,14 +107,14 @@ public class HomeFragment extends Fragment implements Toolbar.OnMenuItemClickLis
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             if (!prefs.getBoolean(HomeFragment.PREF_DISABLE_NOTIFICATION_PERMISSION_NAG, false)) {
-                addSection(new AllowNotificationsSection(), false);
+                addSection(new AllowNotificationsSection());
             }
         }
         if (Calendar.getInstance().get(Calendar.YEAR) == EchoActivity.RELEASE_YEAR
                 && Calendar.getInstance().get(Calendar.MONTH) == Calendar.DECEMBER
                 && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) >= 10
                 && prefs.getInt(PREF_HIDE_ECHO, 0) != EchoActivity.RELEASE_YEAR) {
-            addSection(new EchoSection(), false);
+            addSection(new EchoSection());
         }
 
         List<String> hiddenSections = getHiddenSections(getContext());
@@ -122,26 +123,12 @@ public class HomeFragment extends Fragment implements Toolbar.OnMenuItemClickLis
             if (hiddenSections.contains(sectionTag)) {
                 continue;
             }
-            Fragment section = getSection(sectionTag);
-            //expand if there its inbox or episodes list (not descendants of HomeSection)
-            addSection(section, !HomeSection.class.isAssignableFrom(section.getClass()));
+            addSection(getSection(sectionTag));
         }
     }
 
-    private void addSection(Fragment section, boolean expand) {
+    private void addSection(Fragment section) {
         FragmentContainerView containerView = new FragmentContainerView(getContext());
-        if (expand) {
-            //add separator
-            View separator = new View(getContext());
-            int onedp = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1f, getResources().getDisplayMetrics()));
-            separator.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, onedp));
-            separator.setBackgroundColor(getResources().getColor(R.color.grey600));
-            //separator.setBackgroundColor(ThemeUtils.getColorFromAttr(getContext(), android.R.attr.dividerVertical));
-            viewBinding.homeContainer.addView(separator);
-            //expand section
-            containerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 2f));
-            viewBinding.homeContainer.setPadding(0,0,0,0);
-        }
         containerView.setId(View.generateViewId());
         viewBinding.homeContainer.addView(containerView);
         getChildFragmentManager().beginTransaction().add(containerView.getId(), section).commit();
@@ -186,6 +173,8 @@ public class HomeFragment extends Fragment implements Toolbar.OnMenuItemClickLis
         if (item.getItemId() == R.id.homesettings_items) {
             HomeSectionsSettingsDialog.open(getContext(), (dialogInterface, i) -> populateSectionList());
             return true;
+        } else if (item.getItemId() == R.id.action_link_to_discovery) {
+            ((MainActivity) getActivity()).loadFragment(AddFeedFragment.TAG, null);
         } else if (item.getItemId() == R.id.refresh_item) {
             FeedUpdateManager.runOnceOrAsk(requireContext());
             return true;
