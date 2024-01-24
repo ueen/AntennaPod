@@ -37,7 +37,7 @@ public class AllEpisodesFragment extends EpisodesListFragment {
         final View root = super.onCreateView(inflater, container, savedInstanceState);
         toolbar.inflateMenu(R.menu.episodes);
         toolbar.setTitle(R.string.episodes_label);
-        activateFAB();
+        activateFab();
         updateToolbar();
         updateFilterUi();
         txtvInformation.setOnClickListener(
